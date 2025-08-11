@@ -82,7 +82,7 @@ unzipWebpFromDataUri(zipUrl).then(blobUrls => {
             Object.defineProperty(el, 'src', {
                 set(newSrc) {
                     const filename = extractFilename(newSrc);
-                    const replacement = dataURIs[filename];
+                    const replacement = blobUrlss[filename];
                     if (replacement) {
                         
                         ORIGINAL_SET_ATTRIBUTE.call(el, 'src', replacement);
