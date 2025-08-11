@@ -30,23 +30,44 @@ async function unzipWebpFromDataUri(dataUri) {
 
 
     for (const [filename, file] of Object.entries(zip.files)) {
-        if (!file.dir && filename.toLowerCase().endsWith('.webp')) {
-            const blob = await file.async("blob");
-            const blobUrl = URL.createObjectURL(blob);
-			console.log(filename)
-            blobUrls[filename] = blobUrl;
+    if (!file.dir) {
+        let mime = '';
+
+        if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
+            mime = 'text/javascript';
+        } else if (filename.endsWith('.css')) {
+            mime = 'text/css';
+        } else if (filename.endsWith('.html')) {
+            mime = 'text/html';
+        } else if (filename.endsWith('.webp')) {
+            mime = 'image/webp';
+        } else if (filename.endsWith('.png')) {
+            mime = 'image/png';
+        } else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+            mime = 'image/jpeg';
         }
+      
+
+        const rawBlob = await file.async("blob");
+        const blob = mime ? new Blob([rawBlob], { type: mime }) : rawBlob;
+
+        const blobUrl = URL.createObjectURL(blob);
+        console.log(filename);
+        blobUrls[filename] = blobUrl;
     }
+}
+
 
     return blobUrls;
 }
+
 let blobUrlss = "";
 let zipUrl = ""; //place the data uri of your zip file with all assets here.
 unzipWebpFromDataUri(zipUrl).then(blobUrls => {
   blobUrlss = blobUrls
-});
 
-console.log(blobUrlss)
+
+
     
   
 
@@ -187,4 +208,5 @@ function rewriteURL(original) {
   if (trimmed.includes("?")) trimmed = trimmed.split("?")[0]
   return blobUrlss[trimmed] || original;
 }
+});
 </script>
