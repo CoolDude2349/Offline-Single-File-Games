@@ -76,8 +76,8 @@
 
       .back-btn {
         position: absolute;
-        top: 0px;
-        left: 0px;
+        top: 5px;
+        left: 5px;
         font-size: 10px;
         padding: 2px 5px;
         z-index: 10000;
@@ -164,7 +164,7 @@
 
       function run() {
         if (chunkModeEl.checked) {
-          iframeEl.srcdoc = chunks.concat(editorEl.value).join('\n');
+          iframeEl.srcdoc = chunks.concat(editorEl.value).join('');
         } else {
           iframeEl.srcdoc = editorEl.value;
         }
