@@ -1,0 +1,210 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      header {
+        background: #eee;
+        display: flex;
+        gap: 0.5em;
+        align-items: center;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+
+      aside {
+        width: 150px;
+        padding: 0.5em;
+        background: #f5f5f5;
+        overflow-y: auto;
+      }
+
+      textarea {
+        flex: 1;
+        padding: 0.5em;
+        font-family: monospace;
+        resize: both;
+        min-width: 150px;
+        min-height: 150px;
+      }
+
+      .preview-container {
+        flex: 1;
+        border: 1px solid #ccc;
+        position: relative;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      button {
+        padding: 0.3em 0.5em;
+      }
+
+      .saved-list button {
+        display: block;
+        width: 100%;
+        margin: 0.2em 0;
+        text-align: left;
+      }
+
+      .fullscreen {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 9999;
+        background: #fff;
+      }
+
+      .back-btn {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        font-size: 7px;
+        padding: 2px 5px;
+        z-index: 10000;
+        display: none;
+      }
+
+      .fullscreen .back-btn {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <input id="snippetName" type="text" placeholder="Add a name" />
+      <button id="runBtn">Run</button>
+      <button id="saveBtn">Save</button>
+      <button id="clearBtn">Clear</button>
+      <button id="fullscreenBtn">Fullscreen Preview</button>
+      <h2>The Epic Viewer</h2>
+    </header>
+    <main>
+      <aside>
+        <strong>Saved</strong>
+        <div id="savedList" class="saved-list"></div>
+      </aside>
+      <textarea id="editor" spellcheck="false"></textarea>
+      <div id="previewContainer" class="preview-container">
+        <button id="backBtn" class="back-btn">B</button>
+        <iframe id="preview"></iframe>
+      </div>
+    </main>
+    <script>
+      const DB_NAME = 'codepad';
+      const STORE = 'snippets';
+
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE)) {
+              db.createObjectStore(STORE, {
+                keyPath: 'name'
+              });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function putSnippet(obj) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE, 'readwrite');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+          tx.objectStore(STORE).put(obj);
+        });
+      }
+      async function getSnippet(name) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const req = db.transaction(STORE).objectStore(STORE).get(name);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function listSnippetNames() {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const names = [];
+          db.transaction(STORE).objectStore(STORE).openCursor().onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) {
+              names.push(cursor.key);
+              cursor.continue();
+            } else resolve(names);
+          };
+        });
+      }
+      const editorEl = document.getElementById('editor');
+      const iframeEl = document.getElementById('preview');
+      const savedListEl = document.getElementById('savedList');
+      const nameEl = document.getElementById('snippetName');
+      const previewContainer = document.getElementById('previewContainer');
+      const backBtn = document.getElementById('backBtn');
+
+      function run() {
+        iframeEl.srcdoc = editorEl.value;
+      }
+      async function save() {
+        const name = (nameEl.value || '').trim();
+        if (!name) return alert('Enter a name');
+        await putSnippet({
+          name,
+          html: editorEl.value
+        });
+        refreshSavedList();
+      }
+      async function refreshSavedList() {
+        savedListEl.innerHTML = '';
+        const names = await listSnippetNames();
+        names.forEach(name => {
+          const btn = document.createElement('button');
+          btn.textContent = name;
+          btn.onclick = async () => {
+            const rec = await getSnippet(name);
+            if (rec) {
+              nameEl.value = rec.name;
+              editorEl.value = rec.html;
+              run();
+            }
+          };
+          savedListEl.appendChild(btn);
+        });
+      }
+      document.getElementById('runBtn').onclick = run;
+      document.getElementById('saveBtn').onclick = save;
+      document.getElementById('clearBtn').onclick = () => editorEl.value = '';
+      document.getElementById('fullscreenBtn').onclick = () => {
+        previewContainer.classList.add('fullscreen');
+      };
+      backBtn.onclick = () => {
+        previewContainer.classList.remove('fullscreen');
+      };
+      editorEl.value = '<h1> Wumbo </h1>';
+      run();
+      refreshSavedList();
+    </script>
+  </body>
+</html>
