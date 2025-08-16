@@ -1,5 +1,3 @@
-
-
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -14,6 +12,7 @@
       }
 
       header {
+        padding: 0.5em;
         background: #eee;
         display: flex;
         gap: 0.5em;
@@ -77,9 +76,9 @@
 
       .back-btn {
         position: absolute;
-        top: 0px;
-        left: 0px;
-        font-size: 7px;
+        top: 5px;
+        left: 5px;
+        font-size: 10px;
         padding: 2px 5px;
         z-index: 10000;
         display: none;
@@ -91,28 +90,19 @@
     </style>
   </head>
   <body>
-    <header>
-      <input id="snippetName" type="text" placeholder="Add a name" />
-      <button id="runBtn">Run</button>
-      <button id="saveBtn">Save</button>
-      <button id="clearBtn">Clear</button>
-      <button id="fullscreenBtn">Fullscreen Preview</button>
+    <header><input id="snippetName" type="text" placeholder="Snippet name" /><button id="runBtn">Run</button><button id="saveBtn">Save</button><button id="clearBtn">Clear</button><label><input type="checkbox" id="chunkMode">Chunk Mode</label><button id="addChunkBtn" disabled>Add Chunk</button><button id="fullscreenBtn">Fullscreen Preview</button>
       <h2>The Epic Viewer</h2>
     </header>
     <main>
-      <aside>
-        <strong>Saved:</strong>
+      <aside><strong>Saved</strong>
         <div id="savedList" class="saved-list"></div>
-      </aside>
-      <textarea id="editor" spellcheck="false"></textarea>
-      <div id="previewContainer" class="preview-container">
-        <button id="backBtn" class="back-btn">B</button>
-        <iframe id="preview"></iframe>
-      </div>
+      </aside><textarea id="editor" spellcheck="false"></textarea>
+      <div id="previewContainer" class="preview-container"><button id="backBtn" class="back-btn">B</button><iframe id="preview"></iframe></div>
     </main>
     <script>
       const DB_NAME = 'codepad';
       const STORE = 'snippets';
+      let chunks = []
 
       function openDB() {
         return new Promise((resolve, reject) => {
@@ -159,15 +149,25 @@
           };
         });
       }
-      const editorEl = document.getElementById('editor');
-      const iframeEl = document.getElementById('preview');
+      const editorEl = document.getElementById('editor')
+      const iframeEl = document.getElementById('preview')
       const savedListEl = document.getElementById('savedList');
       const nameEl = document.getElementById('snippetName');
       const previewContainer = document.getElementById('previewContainer');
       const backBtn = document.getElementById('backBtn');
+      const chunkModeEl = document.getElementById('chunkMode');
+      const addChunkBtn = document.getElementById('addChunkBtn');
+      chunkModeEl.addEventListener('change', () => {
+        addChunkBtn.disabled = !chunkModeEl.checked;
+        if (!chunkModeEl.checked) chunks = [];
+      });
 
       function run() {
-        iframeEl.srcdoc = editorEl.value;
+        if (chunkModeEl.checked) {
+          iframeEl.srcdoc = chunks.concat(editorEl.value).join('\n');
+        } else {
+          iframeEl.srcdoc = editorEl.value;
+        }
       }
       async function save() {
         const name = (nameEl.value || '').trim();
@@ -179,11 +179,11 @@
         refreshSavedList();
       }
       async function refreshSavedList() {
-        savedListEl.innerHTML = '';
+        savedListEl.innerHTML = ''
         const names = await listSnippetNames();
         names.forEach(name => {
-          const btn = document.createElement('button');
-          btn.textContent = name;
+          const btn = document.createElement('button')
+          btn.textContent = name
           btn.onclick = async () => {
             const rec = await getSnippet(name);
             if (rec) {
@@ -195,16 +195,16 @@
           savedListEl.appendChild(btn);
         });
       }
-      document.getElementById('runBtn').onclick = run;
+      document.getElementById('runBtn').onclick = run
       document.getElementById('saveBtn').onclick = save;
       document.getElementById('clearBtn').onclick = () => editorEl.value = '';
-      document.getElementById('fullscreenBtn').onclick = () => {
-        previewContainer.classList.add('fullscreen');
+      document.getElementById('fullscreenBtn').onclick = () => previewContainer.classList.add('fullscreen');
+      backBtn.onclick = () => previewContainer.classList.remove('fullscreen');
+      addChunkBtn.onclick = () => {
+        chunks.push(editorEl.value);
+        editorEl.value = '';
+        alert('A Chunk has been added. You now have ' + chunks.length + ' chunks.');
       };
-      backBtn.onclick = () => {
-        previewContainer.classList.remove('fullscreen');
-      };
-      editorEl.value = '<h1> Wumbo </h1>';
       run();
       refreshSavedList();
     </script>
