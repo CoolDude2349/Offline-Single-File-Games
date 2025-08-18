@@ -89,7 +89,6 @@
         border: solid black;
         cursor: pointer;
         padding: 0 0.4em;
-    
       }
 
       .fullscreen {
@@ -116,6 +115,14 @@
 
       .fullscreen .back-btn {
         display: block;
+      }
+
+      #exitSnippetBtn {
+        display: none;
+        background: #444;
+        color: white;
+        border: solid black;
+        cursor: pointer;
       }
 
       @media (max-width: 900px) {
@@ -151,6 +158,7 @@
       <label><input type="checkbox" checked id="hideEditorText">Hide Editor Text For Saved Code</label>
       <button id="addChunkBtn" disabled>Add Chunk</button>
       <button id="fullscreenBtn">Fullscreen</button>
+      <button id="exitSnippetBtn">Exit Snippet</button>
       <h2>The Epic Viewer</h2>
       <h3>Run code from the textbox, combined chunks, or saved snippets.</h3>
     </header>
@@ -236,6 +244,7 @@
       const chunkModeEl = document.getElementById('chunkMode');
       const addChunkBtn = document.getElementById('addChunkBtn');
       const hideEditorTextEl = document.getElementById('hideEditorText');
+      const exitSnippetBtn = document.getElementById('exitSnippetBtn');
 
       chunkModeEl.addEventListener('change', () => {
         addChunkBtn.disabled = !chunkModeEl.checked;
@@ -286,6 +295,7 @@
               } else {
                 editorEl.value = rec.html || '';
               }
+              exitSnippetBtn.style.display = 'inline-block'; 
             }
           };
 
@@ -315,6 +325,15 @@
         chunks.push(editorEl.value);
         editorEl.value = '';
         alert('A Chunk has been added. You now have ' + chunks.length + ' chunks.');
+      };
+
+     
+      exitSnippetBtn.onclick = () => {
+        nameEl.value = '';
+        editorEl.value = '';
+        iframeEl.srcdoc = '';
+        chunks = [];
+        exitSnippetBtn.style.display = 'none'; 
       };
 
       run();
