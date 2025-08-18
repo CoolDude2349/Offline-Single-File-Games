@@ -70,11 +70,26 @@
         padding: 0.3em 0.5em;
       }
 
-      .saved-list button {
-        display: block;
-        width: 100%;
+      .saved-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin: 0.2em 0;
-        text-align: left;
+      }
+
+      .saved-item button {
+        flex: 1;
+        margin-right: 0.2em;
+      }
+
+      .delete-btn {
+        flex: 0;
+        background: #ff0000;
+        color: white;
+        border: solid black;
+        cursor: pointer;
+        padding: 0 0.4em;
+    
       }
 
       .fullscreen {
@@ -103,7 +118,6 @@
         display: block;
       }
 
-     
       @media (max-width: 900px) {
         main {
           flex-direction: column;
@@ -189,6 +203,16 @@
         });
       }
 
+      async function deleteSnippet(name) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE, 'readwrite');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+          tx.objectStore(STORE).delete(name);
+        });
+      }
+
       async function listSnippetNames() {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -246,6 +270,9 @@
         savedListEl.innerHTML = '';
         const names = await listSnippetNames();
         names.forEach(name => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'saved-item';
+
           const btn = document.createElement('button');
           btn.textContent = name;
           btn.onclick = async () => {
@@ -261,7 +288,21 @@
               }
             }
           };
-          savedListEl.appendChild(btn);
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'X';
+          delBtn.className = 'delete-btn';
+          delBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if (confirm('Delete saved code?')) {
+              await deleteSnippet(name);
+              refreshSavedList();
+            }
+          };
+
+          wrapper.appendChild(btn);
+          wrapper.appendChild(delBtn);
+          savedListEl.appendChild(wrapper);
         });
       }
 
