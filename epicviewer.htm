@@ -90,19 +90,32 @@
     </style>
   </head>
   <body>
-    <header><input id="snippetName" type="text" placeholder="Snippet name" /><button id="runBtn">Run</button><button id="saveBtn">Save</button><button id="clearBtn">Clear</button><label><input type="checkbox" id="chunkMode">Chunk Mode</label><button id="addChunkBtn" disabled>Add Chunk</button><button id="fullscreenBtn">Fullscreen Preview</button>
+    <header>
+      <input id="snippetName" type="text" placeholder="Snippet name" />
+      <button id="runBtn">Run</button>
+      <button id="saveBtn">Save</button>
+      <button id="clearBtn">Clear</button>
+      <label><input type="checkbox" id="chunkMode">Chunk Mode</label>
+    <label><input type="checkbox" checked id="hideEditorText">Hide Editor Text For Saved Code</label>
+      <button id="addChunkBtn" disabled>Add Chunk</button>
+      <button id="fullscreenBtn">Fullscreen Preview</button>
+    
       <h2>The Epic Viewer</h2>
     </header>
     <main>
       <aside><strong>Saved</strong>
         <div id="savedList" class="saved-list"></div>
-      </aside><textarea id="editor" spellcheck="false"></textarea>
-      <div id="previewContainer" class="preview-container"><button id="backBtn" class="back-btn">B</button><iframe id="preview"></iframe></div>
+      </aside>
+      <textarea id="editor" spellcheck="false"></textarea>
+      <div id="previewContainer" class="preview-container">
+        <button id="backBtn" class="back-btn">B</button>
+        <iframe id="preview"></iframe>
+      </div>
     </main>
     <script>
       const DB_NAME = 'codepad';
       const STORE = 'snippets';
-      let chunks = []
+      let chunks = [];
 
       function openDB() {
         return new Promise((resolve, reject) => {
@@ -110,15 +123,14 @@
           req.onupgradeneeded = e => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains(STORE)) {
-              db.createObjectStore(STORE, {
-                keyPath: 'name'
-              });
+              db.createObjectStore(STORE, { keyPath: 'name' });
             }
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
         });
       }
+
       async function putSnippet(obj) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -128,6 +140,7 @@
           tx.objectStore(STORE).put(obj);
         });
       }
+
       async function getSnippet(name) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -136,6 +149,7 @@
           req.onerror = () => reject(req.error);
         });
       }
+
       async function listSnippetNames() {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -149,14 +163,17 @@
           };
         });
       }
-      const editorEl = document.getElementById('editor')
-      const iframeEl = document.getElementById('preview')
+
+      const editorEl = document.getElementById('editor');
+      const iframeEl = document.getElementById('preview');
       const savedListEl = document.getElementById('savedList');
       const nameEl = document.getElementById('snippetName');
       const previewContainer = document.getElementById('previewContainer');
       const backBtn = document.getElementById('backBtn');
       const chunkModeEl = document.getElementById('chunkMode');
       const addChunkBtn = document.getElementById('addChunkBtn');
+      const hideEditorTextEl = document.getElementById('hideEditorText');
+
       chunkModeEl.addEventListener('change', () => {
         addChunkBtn.disabled = !chunkModeEl.checked;
         if (!chunkModeEl.checked) chunks = [];
@@ -169,33 +186,49 @@
           iframeEl.srcdoc = editorEl.value;
         }
       }
+
       async function save() {
         const name = (nameEl.value || '').trim();
         if (!name) return alert('Enter a name');
+
+        const combined = chunks.concat(editorEl.value).join('');
+
         await putSnippet({
           name,
-          html: editorEl.value
+          html: combined,
+          chunks: chunks,
+          combined: combined
         });
+
         refreshSavedList();
       }
+
       async function refreshSavedList() {
-        savedListEl.innerHTML = ''
+        savedListEl.innerHTML = '';
         const names = await listSnippetNames();
         names.forEach(name => {
-          const btn = document.createElement('button')
-          btn.textContent = name
+          const btn = document.createElement('button');
+          btn.textContent = name;
           btn.onclick = async () => {
             const rec = await getSnippet(name);
             if (rec) {
               nameEl.value = rec.name;
-              editorEl.value = rec.html;
-              run();
+              chunks = rec.chunks || [];
+              iframeEl.srcdoc = rec.html || '';
+
+              // Hide editor text if checkbox is checked
+              if (hideEditorTextEl.checked) {
+                editorEl.value = '';
+              } else {
+                editorEl.value = rec.html || '';
+              }
             }
           };
           savedListEl.appendChild(btn);
         });
       }
-      document.getElementById('runBtn').onclick = run
+
+      document.getElementById('runBtn').onclick = run;
       document.getElementById('saveBtn').onclick = save;
       document.getElementById('clearBtn').onclick = () => editorEl.value = '';
       document.getElementById('fullscreenBtn').onclick = () => previewContainer.classList.add('fullscreen');
@@ -205,6 +238,7 @@
         editorEl.value = '';
         alert('A Chunk has been added. You now have ' + chunks.length + ' chunks.');
       };
+
       run();
       refreshSavedList();
     </script>
