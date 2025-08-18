@@ -98,7 +98,7 @@
       <label><input type="checkbox" id="chunkMode">Chunk Mode</label>
     <label><input type="checkbox" checked id="hideEditorText">Hide Editor Text For Saved Code</label>
       <button id="addChunkBtn" disabled>Add Chunk</button>
-      <button id="fullscreenBtn">Fullscreen Preview</button>
+      <button id="fullscreenBtn">Fullscreen</button>
     
       <h2>The Epic Viewer</h2>
     </header>
@@ -130,7 +130,7 @@
           req.onerror = () => reject(req.error);
         });
       }
-
+    
       async function putSnippet(obj) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -178,7 +178,9 @@
         addChunkBtn.disabled = !chunkModeEl.checked;
         if (!chunkModeEl.checked) chunks = [];
       });
-
+      
+    //Outputing the value of the textbox or the chunks combined
+      
       function run() {
         if (chunkModeEl.checked) {
           iframeEl.srcdoc = chunks.concat(editorEl.value).join('');
@@ -216,7 +218,7 @@
               chunks = rec.chunks || [];
               iframeEl.srcdoc = rec.html || '';
 
-              // Hide editor text if checkbox is checked
+              
               if (hideEditorTextEl.checked) {
                 editorEl.value = '';
               } else {
