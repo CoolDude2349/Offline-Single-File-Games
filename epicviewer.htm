@@ -306,7 +306,13 @@
             e.stopPropagation();
             if (confirm('Delete saved code?')) {
               await deleteSnippet(name);
+              
               refreshSavedList();
+              nameEl.value = '';
+        editorEl.value = '';
+        iframeEl.srcdoc = '';
+        chunks = [];
+        exitSnippetBtn.style.display = 'none'; 
             }
           };
 
