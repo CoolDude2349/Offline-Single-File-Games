@@ -12,7 +12,7 @@ The downside of inlining everything is the file size. If you're running the file
 
 # For Chromebooks
 
-Use a code editor like [W3Schools](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_default) or [Codecademy](https://www.codecademy.com/courses/learn-html-fundamentals/lessons/intro-to-html/exercises/intro), and paste the code of [single-file.html](single-file.html). You can also download the files and open in **file://**.
+Use a code editor like [W3Schools](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_default) or [Codecademy](https://www.codecademy.com/courses/learn-html-fundamentals/lessons/intro-to-html/exercises/intro), and paste the code of [single-file.html](single-file.html). You can also download the single file and open in **file://**.
 
 JSDELIVR blocked:
 1. Download the repository through your phone or another device
