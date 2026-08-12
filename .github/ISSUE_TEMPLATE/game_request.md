@@ -5,9 +5,9 @@ title: "[Game Request] "
 labels: game-request
 ---
 
-**Game name:**
+Game name:
 
 
-**Game link (optional):**
+Game link (optional):
 
 
