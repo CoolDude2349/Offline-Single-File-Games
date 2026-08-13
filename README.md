@@ -8,7 +8,7 @@ A repo filled with 300 offline games that can each run on a single file. This is
 
 The downside of inlining everything is the file size. If you're running the files via an online code editor, it's better to use **single-file.html**. It lets you fetch the files from the web or import your own.
 
-
+SUGGEST GAMES [HERE](https://github.com/CoolDude2349/Offline-HTML-Games-Pack/issues/new?template=game_request.md)
 
 # For Chromebooks
 
