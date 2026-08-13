@@ -1,13 +1,13 @@
 ---
 name: Game Request
-about: Suggest a game to add
+about: Suggest games to add
 title: "Game Request"
 labels: game-request
 ---
 
-Game name:
+Game name(s):
 
 
-Game link (optional):
+Game link(s) (optional):
 
 
