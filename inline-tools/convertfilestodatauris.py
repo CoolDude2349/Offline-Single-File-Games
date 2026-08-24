@@ -4,6 +4,8 @@ import mimetypes
 import json
 import sys
 
+# This things old just use full inliner
+
 
 input_folder = "folder"  # Place your folder where all assets are here
 output_js_file = "dataURIs.js"  
