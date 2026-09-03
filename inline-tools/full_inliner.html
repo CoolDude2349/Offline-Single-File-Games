@@ -79,7 +79,7 @@ async function loadZip(input, DATA_COMPRESSED) {
 const DATA_COMPRESSED = false;
 let zipUrl = '';
 
-var blobUrlss;
+var dataGroup;
 
 
 
@@ -87,7 +87,7 @@ var blobUrlss;
 loadZip(zipUrl, DATA_COMPRESSED).then(blobUrls => {
     zipUrl = null;
     
-  blobUrlss = blobUrls
+  dataGroup = blobUrls
 
 
 
@@ -274,7 +274,7 @@ function rewriteURL(original) {
   const match = trimmed2.match(/(heeellooo)\/.*/);
   if (match) trimmed2 = match[0];
 
-  return blobUrlss[trimmed2] || blobUrlss[trimmed] || original;
+  return dataGroup[trimmed2] || dataGroup[trimmed] || original;
 }
 });
 </script>
